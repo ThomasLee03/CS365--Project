@@ -1,0 +1,21 @@
+//matches count per version
+
+SELECT version, Count(id)
+From matches 
+Where (version ="7.9.186.1051" or version ="7.8.184.113" or version = "7.9.186.8155" or version = "7.10.187.9675")
+Group by version
+
+//win for specific champion (here it is champion id 6)
+
+SELECT M.version, S.win, Count(*)
+FROM participants P, stats1 S, matches M
+WHERE P.id = S.id and M.id  = P.matchid and P.championid = '6' and (M.version = "7.10.187.9675" or M.version ="7.8.184.113" or M.version = "7.9.186.1051" or M.version = "7.9.186.8155")
+Group by M.version, S.win 
+
+//number of times champion is played in selected versions
+
+SELECT P.championid, Count(*)
+FROM participants P, stats1 S, matches M
+WHERE P.id = S.id and M.id  = P.matchid and (M.version = "7.9.186.8155" or M.version = "7.10.187.9675" or M.version ="7.8.184.113" or M.version ="7.9.186.1051" or M.version ="7.7.183.8394")
+Group by P.championid, S.win 
+Order by Count(*) desc 

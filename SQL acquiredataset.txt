@@ -1,0 +1,45 @@
+SQLite script:
+
+WITH RecursiveSplit AS (
+    SELECT
+        matchid,
+        1 AS column_number,
+        substr(champions, 1, instr(champions || ',', ',') - 1) AS column_value,
+        substr(champions || ',', instr(champions || ',', ',') + 1) AS remaining_values,
+		WinFirstTeam,
+		WinSecondTeam
+    FROM (SELECT P.matchid, GROUP_CONCAT(P.championid) as champions, T.win as WinFirstTeam, Case when T.win = '0' then '1' Else '0' end as WinSecondTeam
+From participants P, stats1 T
+Where P.id = T.id
+Group by matchid
+Order by matchid)
+    
+    UNION ALL
+    
+    SELECT
+        matchid,
+        column_number + 1,
+        substr(remaining_values, 1, instr(remaining_values, ',') - 1),
+        substr(remaining_values, instr(remaining_values, ',') + 1),
+		WinFirstTeam,
+		WinSecondTeam
+    FROM RecursiveSplit
+    WHERE remaining_values <> ''
+)
+SELECT
+    matchid,
+    MAX(CASE WHEN column_number = 1 THEN column_value END) AS Champion1,
+    MAX(CASE WHEN column_number = 2 THEN column_value END) AS Champion2,
+    MAX(CASE WHEN column_number = 3 THEN column_value END) AS Champion3,
+    MAX(CASE WHEN column_number = 4 THEN column_value END) AS Champion4,
+    MAX(CASE WHEN column_number = 5 THEN column_value END) AS Champion5,
+    MAX(CASE WHEN column_number = 6 THEN column_value END) AS Champion6,
+    MAX(CASE WHEN column_number = 7 THEN column_value END) AS Champion7,
+    MAX(CASE WHEN column_number = 8 THEN column_value END) AS Champion8,
+    MAX(CASE WHEN column_number = 9 THEN column_value END) AS Champion9,
+    MAX(CASE WHEN column_number = 10 THEN column_value END) AS Champion10,
+    MAX(WinFirstTeam) AS WinFirstTeam,
+    MAX(WinSecondTeam) AS WinSecondTeam
+FROM RecursiveSplit
+GROUP BY matchid, WinFirstTeam, WinSecondTeam;
+
